@@ -1,10 +1,10 @@
-# ACW Email Campaign Manager
+# ACW Atlanta Email Manager
 
-A complete email management solution with both SMTP (sending) and POP3 (receiving) capabilities, featuring a beautiful web interface for managing all your email communications.
+A complete email management solution for Ascent Counseling & Wellness (ACW Atlanta) with both SMTP (sending) and POP3 (receiving) capabilities, pre-configured for the ACW mail server (acwatl.com).
 
 ## 📧 Overview
 
-ACW Email Campaign Manager is a comprehensive dual-protocol email solution that allows you to:
+ACW Atlanta Email Manager is a comprehensive dual-protocol email solution that allows you to:
 - **Send** bulk email campaigns via SMTP
 - **Receive** and manage emails via POP3  
 - Manage recipient lists with ease
@@ -147,22 +147,34 @@ node server.js
 # Visit http://localhost:3000
 ```
 
-### SMTP Configuration
+### ACW Atlanta Mail Server Configuration
 
-#### Gmail Setup
-1. Enable 2-Factor Authentication
-2. Generate App Password
-3. Use in SMTP settings:
-   - Host: `smtp.gmail.com`
-   - Port: `587`
-   - User: Your Gmail address
-   - Password: App Password (not regular password)
+#### Pre-configured Settings
 
-#### Other Providers
-- **SendGrid**: Professional email service with API
-- **Mailgun**: Developer-friendly email platform
-- **Amazon SES**: Scalable cloud email service
-- **Custom SMTP**: Any SMTP server you have access to
+**SMTP (Outgoing Mail)**:
+- Host: `acwatl.com`
+- Port: `465` (SSL/TLS)
+- Username: `jhinson@acwatl.com`
+- Password: Your email account password
+- Authentication: Required
+
+**POP3 (Incoming Mail)**:
+- Host: `acwatl.com`
+- Port: `995` (SSL)
+- Username: `jhinson@acwatl.com`
+- Password: Same as SMTP password
+- Authentication: Required
+
+**IMAP Alternative** (Recommended over POP3):
+- Host: `acwatl.com`
+- Port: `993` (SSL)
+- Better synchronization across devices
+
+#### Setup Notes
+1. All settings are pre-configured in the application
+2. Use your regular email account password (not an app password)
+3. All protocols require authentication
+4. Test connections before sending campaigns
 
 ## 📊 Features Breakdown
 

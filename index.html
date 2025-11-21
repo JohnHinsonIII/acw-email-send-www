@@ -447,8 +447,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📧 ACW Email Campaign Manager</h1>
-            <p>Complete Email Solution: Send (SMTP) & Receive (POP3)</p>
+            <h1>📧 ACW Atlanta Email Manager</h1>
+            <p>Ascent Counseling & Wellness - Complete Email Solution</p>
             <div class="status-bar">
                 <div class="connection-status" id="smtp-status">
                     <span>📤 SMTP: Disconnected</span>
@@ -479,12 +479,12 @@
 
                             <div class="input-group">
                                 <label for="from-email">From Email</label>
-                                <input type="email" id="from-email" placeholder="sender@example.com">
+                                <input type="email" id="from-email" placeholder="jhinson@acwatl.com" value="jhinson@acwatl.com">
                             </div>
 
                             <div class="input-group">
                                 <label for="reply-to">Reply-To (Optional)</label>
-                                <input type="email" id="reply-to" placeholder="reply@example.com">
+                                <input type="email" id="reply-to" placeholder="jhinson@acwatl.com">
                             </div>
                         </div>
                     </div>
@@ -594,28 +594,28 @@ Merge tags available:
                         <div class="card">
                             <div class="input-group">
                                 <label for="smtp-host">SMTP Host</label>
-                                <input type="text" id="smtp-host" placeholder="smtp.gmail.com" value="smtp.gmail.com">
-                                <p class="help-text">Gmail: smtp.gmail.com | Outlook: smtp-mail.outlook.com</p>
+                                <input type="text" id="smtp-host" placeholder="acwatl.com" value="acwatl.com">
+                                <p class="help-text">ACW Atlanta Mail Server: acwatl.com</p>
                             </div>
 
                             <div class="input-group">
                                 <label for="smtp-port">SMTP Port</label>
                                 <select id="smtp-port">
-                                    <option value="587">587 (TLS - Recommended)</option>
-                                    <option value="465">465 (SSL)</option>
+                                    <option value="465" selected>465 (SSL - ACW Server)</option>
+                                    <option value="587">587 (TLS)</option>
                                     <option value="25">25 (Unencrypted)</option>
                                 </select>
                             </div>
 
                             <div class="input-group">
                                 <label for="smtp-user">SMTP Username</label>
-                                <input type="email" id="smtp-user" placeholder="your-email@gmail.com">
+                                <input type="email" id="smtp-user" placeholder="jhinson@acwatl.com" value="jhinson@acwatl.com">
                             </div>
 
                             <div class="input-group">
                                 <label for="smtp-password">SMTP Password</label>
-                                <input type="password" id="smtp-password" placeholder="App password (not regular password)">
-                                <p class="help-text">Use App Password for Gmail (not your regular password)</p>
+                                <input type="password" id="smtp-password" placeholder="Your email account password">
+                                <p class="help-text">Use your email account password | Authentication required</p>
                             </div>
 
                             <button class="btn btn-primary" onclick="testSMTPConnection()">Test SMTP Connection</button>
@@ -630,27 +630,27 @@ Merge tags available:
                         <div class="card">
                             <div class="input-group">
                                 <label for="pop3-host">POP3 Host</label>
-                                <input type="text" id="pop3-host" placeholder="pop.gmail.com" value="pop.gmail.com">
-                                <p class="help-text">Gmail: pop.gmail.com | Outlook: outlook.office365.com</p>
+                                <input type="text" id="pop3-host" placeholder="acwatl.com" value="acwatl.com">
+                                <p class="help-text">ACW Atlanta Mail Server: acwatl.com</p>
                             </div>
 
                             <div class="input-group">
                                 <label for="pop3-port">POP3 Port</label>
                                 <select id="pop3-port">
-                                    <option value="995">995 (SSL - Recommended)</option>
+                                    <option value="995" selected>995 (SSL - ACW Server)</option>
                                     <option value="110">110 (Unencrypted)</option>
                                 </select>
                             </div>
 
                             <div class="input-group">
                                 <label for="pop3-user">POP3 Username</label>
-                                <input type="email" id="pop3-user" placeholder="your-email@gmail.com">
+                                <input type="email" id="pop3-user" placeholder="jhinson@acwatl.com" value="jhinson@acwatl.com">
                             </div>
 
                             <div class="input-group">
                                 <label for="pop3-password">POP3 Password</label>
-                                <input type="password" id="pop3-password" placeholder="App password">
-                                <p class="help-text">Same as SMTP password (App Password)</p>
+                                <input type="password" id="pop3-password" placeholder="Your email account password">
+                                <p class="help-text">Same as SMTP password | Authentication required</p>
                             </div>
 
                             <div class="input-group">
@@ -666,21 +666,51 @@ Merge tags available:
             </div>
 
             <div class="section">
-                <div class="section-title">ℹ️ Setup Instructions</div>
+                <div class="section-title">ℹ️ ACW Atlanta Mail Server Configuration</div>
                 <div class="card">
-                    <h3 style="color: #2c5f7c; margin-bottom: 15px;">Gmail Setup</h3>
+                    <h3 style="color: #2c5f7c; margin-bottom: 15px;">Server Settings (Pre-configured)</h3>
+                    <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">📤 Outgoing Mail (SMTP)</h4>
+                        <ul style="line-height: 2; list-style: none; padding-left: 0;">
+                            <li><strong>Server:</strong> acwatl.com</li>
+                            <li><strong>Port:</strong> 465 (SSL/TLS)</li>
+                            <li><strong>Authentication:</strong> Required</li>
+                            <li><strong>Username:</strong> jhinson@acwatl.com</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="margin-bottom: 10px;">📥 Incoming Mail (POP3)</h4>
+                        <ul style="line-height: 2; list-style: none; padding-left: 0;">
+                            <li><strong>Server:</strong> acwatl.com</li>
+                            <li><strong>Port:</strong> 995 (SSL)</li>
+                            <li><strong>Authentication:</strong> Required</li>
+                            <li><strong>Username:</strong> jhinson@acwatl.com</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #fff3e0; padding: 20px; border-radius: 8px;">
+                        <h4 style="margin-bottom: 10px;">📧 IMAP Alternative (Port 993)</h4>
+                        <ul style="line-height: 2; list-style: none; padding-left: 0;">
+                            <li><strong>Server:</strong> acwatl.com</li>
+                            <li><strong>Port:</strong> 993 (SSL)</li>
+                            <li><strong>Note:</strong> IMAP recommended over POP3 for better sync</li>
+                        </ul>
+                    </div>
+
+                    <h3 style="color: #2c5f7c; margin: 20px 0 15px;">Setup Steps</h3>
                     <ol style="line-height: 2;">
-                        <li>Enable 2-Factor Authentication in your Google Account</li>
-                        <li>Go to Google Account → Security → App Passwords</li>
-                        <li>Generate an App Password for "Mail"</li>
-                        <li>Use that App Password (not your regular password) in both SMTP and POP3 fields</li>
-                        <li>Enable POP3 in Gmail Settings → Forwarding and POP/IMAP → Enable POP for all mail</li>
+                        <li>Use your ACW email account credentials (jhinson@acwatl.com)</li>
+                        <li>Enter your email account password (not an app password)</li>
+                        <li>All settings are pre-configured for ACW servers</li>
+                        <li>Test connections before sending emails</li>
                     </ol>
 
                     <h3 style="color: #2c5f7c; margin: 20px 0 15px;">Important Notes</h3>
                     <ul style="line-height: 2;">
                         <li><strong>SMTP</strong> is for SENDING emails (outgoing mail)</li>
                         <li><strong>POP3</strong> is for RECEIVING emails (incoming mail)</li>
+                        <li>All protocols require authentication with your email credentials</li>
                         <li>This application requires a backend server to actually connect to SMTP/POP3</li>
                         <li>Frontend demo only - backend code required for production</li>
                     </ul>
