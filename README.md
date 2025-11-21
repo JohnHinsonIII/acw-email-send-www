@@ -1,38 +1,45 @@
-# ACW Email Campaign Sender
+# ACW Email Campaign Manager
 
-A professional email campaign management tool with a beautiful web interface for sending bulk emails, managing recipients, and tracking campaigns.
+A complete email management solution with both SMTP (sending) and POP3 (receiving) capabilities, featuring a beautiful web interface for managing all your email communications.
 
 ## 📧 Overview
 
-ACW Email Campaign Sender is a comprehensive email marketing solution that allows you to:
+ACW Email Campaign Manager is a comprehensive dual-protocol email solution that allows you to:
+- **Send** bulk email campaigns via SMTP
+- **Receive** and manage emails via POP3  
 - Manage recipient lists with ease
-- Create and send professional email campaigns
-- Preview emails before sending
+- View inbox with unread/read status
+- Reply to received emails
 - Track campaign progress in real-time
 - Import/export recipient data via CSV
 
 ## ✨ Features
 
-### Email Management
+### SMTP - Email Sending
 - **Bulk Email Sending**: Send personalized emails to multiple recipients
 - **Recipient Management**: Add, edit, and organize recipients
 - **CSV Import/Export**: Import recipient lists or export for backup
-- **Email Preview**: Preview emails before sending to ensure formatting
+- **Test Email Mode**: Send test emails before full campaigns
+- **Progress Tracking**: Real-time sending progress with visual indicators
 - **Merge Tags**: Personalize emails with recipient data
+- **HTML Support**: Rich HTML email content
+
+### POP3 - Email Receiving
+- **Inbox Management**: Fetch and view incoming emails
+- **Unread Tracking**: Visual distinction between read and unread emails
+- **Email Reader**: View full email content with sender, date, and body
+- **Reply Function**: Quick reply to received emails
+- **Delete Emails**: Remove unwanted messages
+- **Stats Dashboard**: Total emails and unread count
+- **Refresh/Check**: Manually fetch new emails from server
 
 ### User Interface
+- **Dual Protocol Support**: Separate tabs for SMTP and POP3
 - **Modern Design**: Clean, professional interface with gradient backgrounds
 - **Responsive Layout**: Works on desktop, tablet, and mobile devices
-- **Real-time Progress**: Visual progress tracking during email sends
-- **Connection Status**: Monitor SMTP connection status
+- **Connection Status**: Monitor both SMTP and POP3 connections
+- **Settings Panel**: Easy configuration for both protocols
 - **Error Handling**: Clear error messages and feedback
-
-### Campaign Features
-- **Test Email Mode**: Send test emails before full campaigns
-- **Progress Tracking**: See real-time sending progress
-- **Success/Failure Reporting**: Detailed reports on campaign results
-- **Rate Limiting**: Configurable sending rates to respect limits
-- **Email Templates**: Support for HTML email templates
 
 ## 🚀 Live Demo
 

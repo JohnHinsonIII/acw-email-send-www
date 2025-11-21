@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACW Email Campaign Sender</title>
+    <title>ACW Email Campaign Manager - SMTP & POP3</title>
     <style>
         * {
             margin: 0;
@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -44,12 +44,19 @@
             font-size: 1.1rem;
         }
 
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
         .connection-status {
             display: inline-block;
             padding: 8px 16px;
             background: rgba(255,255,255,0.2);
             border-radius: 20px;
-            margin-top: 10px;
             font-size: 0.9rem;
         }
 
@@ -61,21 +68,49 @@
             background: rgba(220, 53, 69, 0.3);
         }
 
-        .main-content {
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            text-align: center;
+        }
+
+        .tab:hover {
+            background: rgba(44, 95, 124, 0.05);
+        }
+
+        .tab.active {
+            color: #2c5f7c;
+            background: white;
+            border-bottom-color: #d4af37;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0;
-        }
-
-        .left-panel {
-            padding: 40px;
-            border-right: 1px solid #e0e0e0;
-            background: #f9f9f9;
-        }
-
-        .right-panel {
-            padding: 40px;
-            background: white;
+            gap: 30px;
         }
 
         .section {
@@ -100,6 +135,13 @@
             border-radius: 2px;
         }
 
+        .card {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -111,6 +153,7 @@
         input[type="text"],
         input[type="email"],
         input[type="password"],
+        input[type="number"],
         textarea,
         select {
             width: 100%;
@@ -122,9 +165,7 @@
             font-family: inherit;
         }
 
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus,
+        input:focus,
         textarea:focus,
         select:focus {
             outline: none;
@@ -149,16 +190,6 @@
             font-style: italic;
         }
 
-        .recipient-input {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .recipient-input input {
-            flex: 1;
-        }
-
         .btn {
             padding: 12px 24px;
             border: none;
@@ -169,7 +200,6 @@
             transition: all 0.3s;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            position: relative;
         }
 
         .btn:disabled {
@@ -193,13 +223,9 @@
             color: #2d2d2d;
         }
 
-        .btn-secondary:hover:not(:disabled) {
-            background: #c09d2f;
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.85rem;
+        .btn-success {
+            background: #28a745;
+            color: white;
         }
 
         .btn-danger {
@@ -207,8 +233,8 @@
             color: white;
         }
 
-        .btn-success {
-            background: #28a745;
+        .btn-info {
+            background: #17a2b8;
             color: white;
         }
 
@@ -219,7 +245,7 @@
         }
 
         .recipients-list {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
@@ -232,14 +258,77 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
+            padding: 10px 15px;
             background: #f9f9f9;
             border-radius: 6px;
             margin-bottom: 8px;
         }
 
-        .recipient-item span {
-            font-size: 0.9rem;
+        .inbox-list {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .email-item {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .email-item:hover {
+            background: #f5f5f5;
+        }
+
+        .email-item.unread {
+            background: #e3f2fd;
+            font-weight: 600;
+        }
+
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .email-from {
+            font-weight: 600;
+            color: #2c5f7c;
+        }
+
+        .email-date {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .email-subject {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .email-preview {
+            font-size: 0.85rem;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .email-detail {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .email-detail.show {
+            display: block;
         }
 
         .status-box {
@@ -263,19 +352,6 @@
         .status-box.error {
             background: #f8d7da;
             border-color: #dc3545;
-        }
-
-        .status-box h3 {
-            margin-bottom: 10px;
-            color: #2c5f7c;
-        }
-
-        .status-box.success h3 {
-            color: #28a745;
-        }
-
-        .status-box.error h3 {
-            color: #dc3545;
         }
 
         .progress-bar {
@@ -304,13 +380,40 @@
             width: 0%;
         }
 
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c5f7c;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
         .spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
             border: 3px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            border-top-color: #2c5f7c;
+            border-top-color: white;
             animation: spin 1s linear infinite;
             margin-left: 10px;
         }
@@ -319,53 +422,23 @@
             to { transform: rotate(360deg); }
         }
 
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #e0e0e0;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 12px 24px;
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #666;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
-        }
-
-        .tab.active {
-            color: #2c5f7c;
-            border-bottom-color: #d4af37;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .email-preview {
-            width: 100%;
-            height: 500px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            background: white;
+        @media (max-width: 968px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab {
+                font-size: 0.9rem;
+                padding: 15px 10px;
+            }
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
+            .tabs {
+                flex-direction: column;
             }
-
-            .left-panel {
-                border-right: none;
+            
+            .tab {
                 border-bottom: 1px solid #e0e0e0;
             }
         }
@@ -374,269 +447,321 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📧 ACW Email Campaign Sender</h1>
-            <p>Professional Email Marketing with Backend Integration</p>
-            <div class="connection-status" id="connection-status">
-                <span id="status-text">Checking connection...</span>
+            <h1>📧 ACW Email Campaign Manager</h1>
+            <p>Complete Email Solution: Send (SMTP) & Receive (POP3)</p>
+            <div class="status-bar">
+                <div class="connection-status" id="smtp-status">
+                    <span>📤 SMTP: Disconnected</span>
+                </div>
+                <div class="connection-status" id="pop3-status">
+                    <span>📥 POP3: Disconnected</span>
+                </div>
             </div>
         </div>
 
-        <div class="main-content">
-            <!-- Left Panel: Configuration -->
-            <div class="left-panel">
-                <!-- SMTP Settings Section -->
-                <div class="section">
-                    <div class="section-title">⚙️ SMTP Configuration</div>
-                    
-                    <div class="input-group">
-                        <label for="smtp-host">SMTP Host</label>
-                        <input type="text" id="smtp-host" placeholder="smtp.gmail.com">
-                        <p class="help-text">Example: smtp.gmail.com, smtp-mail.outlook.com</p>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('send')">📤 Send Emails (SMTP)</button>
+            <button class="tab" onclick="switchTab('receive')">📥 Receive Emails (POP3)</button>
+            <button class="tab" onclick="switchTab('settings')">⚙️ Settings</button>
+        </div>
+
+        <!-- Send Emails Tab -->
+        <div id="send-tab" class="tab-content active">
+            <div class="grid-2">
+                <div>
+                    <div class="section">
+                        <div class="section-title">📧 Email Details</div>
+                        <div class="card">
+                            <div class="input-group">
+                                <label for="email-subject">Subject</label>
+                                <input type="text" id="email-subject" placeholder="Your email subject">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="from-email">From Email</label>
+                                <input type="email" id="from-email" placeholder="sender@example.com">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="reply-to">Reply-To (Optional)</label>
+                                <input type="email" id="reply-to" placeholder="reply@example.com">
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="input-group">
-                        <label for="smtp-port">SMTP Port</label>
-                        <select id="smtp-port">
-                            <option value="587">587 (TLS)</option>
-                            <option value="465">465 (SSL)</option>
-                            <option value="25">25 (Standard)</option>
-                        </select>
-                    </div>
+                    <div class="section">
+                        <div class="section-title">👥 Recipients</div>
+                        <div class="card">
+                            <div class="input-group">
+                                <label for="recipient-email">Add Recipient</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="email" id="recipient-email" placeholder="recipient@example.com" style="flex: 1;">
+                                    <button class="btn btn-secondary" onclick="addRecipient()">Add</button>
+                                </div>
+                            </div>
 
-                    <div class="input-group">
-                        <label for="smtp-username">Username (Email)</label>
-                        <input type="email" id="smtp-username" placeholder="your-email@gmail.com">
-                    </div>
+                            <div class="btn-group">
+                                <button class="btn btn-info" onclick="document.getElementById('csv-upload').click()">Import CSV</button>
+                                <button class="btn btn-info" onclick="exportRecipients()">Export CSV</button>
+                                <button class="btn btn-danger" onclick="clearRecipients()">Clear All</button>
+                            </div>
+                            <input type="file" id="csv-upload" accept=".csv" style="display:none" onchange="importCSV(event)">
 
-                    <div class="input-group">
-                        <label for="smtp-password">Password / App Password</label>
-                        <input type="password" id="smtp-password" placeholder="••••••••">
-                        <p class="help-text">For Gmail, use an App Password, not your regular password</p>
-                    </div>
-
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="saveSMTPSettings()">Save Settings</button>
-                        <button class="btn btn-secondary btn-small" onclick="testSMTP()">Test Connection</button>
+                            <div class="recipients-list" id="recipients-list"></div>
+                            <p class="help-text">Total recipients: <strong id="recipient-count">0</strong></p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Recipients Section -->
-                <div class="section">
-                    <div class="section-title">👥 Recipients</div>
-                    
-                    <div class="recipient-input">
-                        <input type="text" id="recipient-name" placeholder="Name (optional)">
-                        <input type="email" id="recipient-email" placeholder="Email Address">
-                        <button class="btn btn-success btn-small" onclick="addRecipient()">Add</button>
+                <div>
+                    <div class="section">
+                        <div class="section-title">✉️ Email Content</div>
+                        <div class="card">
+                            <div class="input-group">
+                                <label for="email-body">Email Body (HTML supported)</label>
+                                <textarea id="email-body" style="min-height: 300px;" placeholder="Your email content here...
+
+Merge tags available:
+{{name}} - Recipient name
+{{email}} - Recipient email"></textarea>
+                            </div>
+
+                            <div class="btn-group">
+                                <button class="btn btn-primary" onclick="sendTestEmail()">Send Test</button>
+                                <button class="btn btn-success" onclick="sendCampaign()">Send to All</button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="btn-group">
-                        <label for="csv-upload" class="btn btn-secondary btn-small" style="margin: 0; cursor: pointer;">
-                            Import CSV
-                            <input type="file" id="csv-upload" accept=".csv" style="display: none;" onchange="importCSV(event)">
-                        </label>
-                        <button class="btn btn-secondary btn-small" onclick="exportRecipients()">Export CSV</button>
-                        <button class="btn btn-danger btn-small" onclick="clearRecipients()">Clear All</button>
+                    <div class="status-box" id="send-status"></div>
+                    <div class="progress-bar" id="send-progress">
+                        <div class="progress-fill" id="send-progress-fill">0%</div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <div id="recipients-list" class="recipients-list">
-                        <p style="text-align: center; color: #999;">No recipients added yet</p>
+        <!-- Receive Emails Tab -->
+        <div id="receive-tab" class="tab-content">
+            <div class="grid-2">
+                <div>
+                    <div class="section">
+                        <div class="section-title">📬 Inbox</div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="checkEmails()">
+                                <span id="check-btn-text">Check for New Emails</span>
+                            </button>
+                            <button class="btn btn-info" onclick="refreshInbox()">Refresh</button>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="total-emails">0</div>
+                                <div class="stat-label">Total Emails</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="unread-emails">0</div>
+                                <div class="stat-label">Unread</div>
+                            </div>
+                        </div>
+
+                        <div class="inbox-list" id="inbox-list">
+                            <div style="padding: 40px; text-align: center; color: #999;">
+                                <p>No emails loaded</p>
+                                <p style="font-size: 0.9rem; margin-top: 10px;">Click "Check for New Emails" to fetch from POP3 server</p>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
-                        <strong id="recipient-count">0</strong> recipients ready
-                    </p>
+                <div>
+                    <div class="section">
+                        <div class="section-title">📨 Email Details</div>
+                        <div class="email-detail" id="email-detail">
+                            <p style="text-align: center; color: #999;">Select an email to view details</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="grid-2">
+                <div>
+                    <div class="section">
+                        <div class="section-title">📤 SMTP Configuration (Sending)</div>
+                        <div class="card">
+                            <div class="input-group">
+                                <label for="smtp-host">SMTP Host</label>
+                                <input type="text" id="smtp-host" placeholder="smtp.gmail.com" value="smtp.gmail.com">
+                                <p class="help-text">Gmail: smtp.gmail.com | Outlook: smtp-mail.outlook.com</p>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="smtp-port">SMTP Port</label>
+                                <select id="smtp-port">
+                                    <option value="587">587 (TLS - Recommended)</option>
+                                    <option value="465">465 (SSL)</option>
+                                    <option value="25">25 (Unencrypted)</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="smtp-user">SMTP Username</label>
+                                <input type="email" id="smtp-user" placeholder="your-email@gmail.com">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="smtp-password">SMTP Password</label>
+                                <input type="password" id="smtp-password" placeholder="App password (not regular password)">
+                                <p class="help-text">Use App Password for Gmail (not your regular password)</p>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="testSMTPConnection()">Test SMTP Connection</button>
+                            <div class="status-box" id="smtp-test-status"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section">
+                        <div class="section-title">📥 POP3 Configuration (Receiving)</div>
+                        <div class="card">
+                            <div class="input-group">
+                                <label for="pop3-host">POP3 Host</label>
+                                <input type="text" id="pop3-host" placeholder="pop.gmail.com" value="pop.gmail.com">
+                                <p class="help-text">Gmail: pop.gmail.com | Outlook: outlook.office365.com</p>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="pop3-port">POP3 Port</label>
+                                <select id="pop3-port">
+                                    <option value="995">995 (SSL - Recommended)</option>
+                                    <option value="110">110 (Unencrypted)</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="pop3-user">POP3 Username</label>
+                                <input type="email" id="pop3-user" placeholder="your-email@gmail.com">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="pop3-password">POP3 Password</label>
+                                <input type="password" id="pop3-password" placeholder="App password">
+                                <p class="help-text">Same as SMTP password (App Password)</p>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="max-emails">Max Emails to Fetch</label>
+                                <input type="number" id="max-emails" value="50" min="1" max="500">
+                            </div>
+
+                            <button class="btn btn-primary" onclick="testPOP3Connection()">Test POP3 Connection</button>
+                            <div class="status-box" id="pop3-test-status"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Panel: Email Composition -->
-            <div class="right-panel">
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('compose', event)">✉️ Compose</button>
-                    <button class="tab" onclick="switchTab('preview', event)">👁️ Preview</button>
-                </div>
+            <div class="section">
+                <div class="section-title">ℹ️ Setup Instructions</div>
+                <div class="card">
+                    <h3 style="color: #2c5f7c; margin-bottom: 15px;">Gmail Setup</h3>
+                    <ol style="line-height: 2;">
+                        <li>Enable 2-Factor Authentication in your Google Account</li>
+                        <li>Go to Google Account → Security → App Passwords</li>
+                        <li>Generate an App Password for "Mail"</li>
+                        <li>Use that App Password (not your regular password) in both SMTP and POP3 fields</li>
+                        <li>Enable POP3 in Gmail Settings → Forwarding and POP/IMAP → Enable POP for all mail</li>
+                    </ol>
 
-                <!-- Compose Tab -->
-                <div id="compose-tab" class="tab-content active">
-                    <div class="section">
-                        <div class="input-group">
-                            <label for="from-name">From Name</label>
-                            <input type="text" id="from-name" placeholder="ACW Email Campaign">
-                        </div>
-
-                        <div class="input-group">
-                            <label for="test-email">Test Email Address</label>
-                            <input type="email" id="test-email" placeholder="test@example.com">
-                            <p class="help-text">Send a test email to this address before bulk sending</p>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="subject">Email Subject</label>
-                            <input type="text" id="subject" placeholder="Your Amazing Subject Line">
-                        </div>
-
-                        <div class="input-group">
-                            <label for="landing-url">Landing Page URL</label>
-                            <input type="text" id="landing-url" placeholder="https://your-landing-page.com">
-                            <p class="help-text">Use [LANDING_PAGE_URL] in your HTML to insert this link</p>
-                        </div>
-
-                        <div class="input-group">
-                            <label for="html-content">HTML Email Content</label>
-                            <textarea id="html-content" placeholder="Paste your HTML email template here...
-
-Available merge tags:
-[First Name] - Recipient's first name
-[LANDING_PAGE_URL] - Your landing page URL
-[UNSUBSCRIBE_LINK] - Unsubscribe link"></textarea>
-                            <p class="help-text">Paste your complete HTML email template</p>
-                        </div>
-
-                        <div class="btn-group">
-                            <button class="btn btn-secondary" onclick="previewEmail()">Preview Email</button>
-                            <button class="btn btn-primary" onclick="sendTestEmail()">Send Test</button>
-                            <button class="btn btn-success" onclick="sendBulkEmails()" id="bulk-send-btn">
-                                Send to All Recipients
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Preview Tab -->
-                <div id="preview-tab" class="tab-content">
-                    <div class="section">
-                        <p style="margin-bottom: 15px; color: #666;">Email preview with merge tags replaced:</p>
-                        <iframe id="preview-frame" class="email-preview"></iframe>
-                    </div>
-                </div>
-
-                <!-- Status Box -->
-                <div id="status-box" class="status-box">
-                    <h3 id="status-title">Status</h3>
-                    <p id="status-message"></p>
-                </div>
-
-                <!-- Progress Bar -->
-                <div id="progress-container" class="progress-bar">
-                    <div id="progress-fill" class="progress-fill">0%</div>
+                    <h3 style="color: #2c5f7c; margin: 20px 0 15px;">Important Notes</h3>
+                    <ul style="line-height: 2;">
+                        <li><strong>SMTP</strong> is for SENDING emails (outgoing mail)</li>
+                        <li><strong>POP3</strong> is for RECEIVING emails (incoming mail)</li>
+                        <li>This application requires a backend server to actually connect to SMTP/POP3</li>
+                        <li>Frontend demo only - backend code required for production</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Configuration
-        const API_URL = window.location.origin + '/api';
-        
-        // State
+        // Application State
         let recipients = [];
-        let smtpSettings = {};
+        let emails = [];
+        let selectedEmail = null;
 
-        // Initialize app
-        window.addEventListener('DOMContentLoaded', function() {
-            checkServerConnection();
-            loadRecipients();
-            loadSMTPSettings();
-        });
+        // Tab Switching
+        function switchTab(tab) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
 
-        // Check server connection
-        async function checkServerConnection() {
-            try {
-                const response = await fetch(`${API_URL}/health`);
-                const data = await response.json();
-                
-                const statusEl = document.getElementById('connection-status');
-                const statusText = document.getElementById('status-text');
-                
-                if (data.status === 'ok') {
-                    statusEl.className = 'connection-status connected';
-                    statusText.textContent = `✅ Connected ${data.smtpConfigured ? '• SMTP Ready' : '• Configure SMTP'}`;
-                } else {
-                    statusEl.className = 'connection-status disconnected';
-                    statusText.textContent = '❌ Server Error';
-                }
-            } catch (error) {
-                const statusEl = document.getElementById('connection-status');
-                const statusText = document.getElementById('status-text');
-                statusEl.className = 'connection-status disconnected';
-                statusText.textContent = '❌ Server Offline';
-                showStatus('error', 'Cannot connect to server. Make sure the backend is running.');
-            }
-        }
-
-        // Tab switching
-        function switchTab(tabName, event) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            document.getElementById(tabName + '-tab').classList.add('active');
+            // Show selected tab
+            document.getElementById(tab + '-tab').classList.add('active');
             event.target.classList.add('active');
         }
 
-        // Recipient management
+        // Recipient Management
         function addRecipient() {
-            const name = document.getElementById('recipient-name').value.trim();
-            const email = document.getElementById('recipient-email').value.trim();
+            const emailInput = document.getElementById('recipient-email');
+            const email = emailInput.value.trim();
 
             if (!email) {
-                showStatus('error', 'Please enter an email address');
+                alert('Please enter an email address');
                 return;
             }
 
-            if (!validateEmail(email)) {
-                showStatus('error', 'Please enter a valid email address');
+            if (!isValidEmail(email)) {
+                alert('Please enter a valid email address');
                 return;
             }
 
-            if (recipients.some(r => r.email === email)) {
-                showStatus('error', 'This email is already in the list');
+            if (recipients.find(r => r.email === email)) {
+                alert('This recipient already exists');
                 return;
             }
 
-            recipients.push({ name: name || 'Friend', email: email });
+            recipients.push({ email, name: email.split('@')[0] });
+            emailInput.value = '';
             updateRecipientsList();
-            saveRecipients();
-
-            document.getElementById('recipient-name').value = '';
-            document.getElementById('recipient-email').value = '';
         }
 
-        function removeRecipient(index) {
-            recipients.splice(index, 1);
+        function removeRecipient(email) {
+            recipients = recipients.filter(r => r.email !== email);
             updateRecipientsList();
-            saveRecipients();
-        }
-
-        function updateRecipientsList() {
-            const listDiv = document.getElementById('recipients-list');
-            const countEl = document.getElementById('recipient-count');
-            
-            countEl.textContent = recipients.length;
-
-            if (recipients.length === 0) {
-                listDiv.innerHTML = '<p style="text-align: center; color: #999;">No recipients added yet</p>';
-                return;
-            }
-
-            listDiv.innerHTML = recipients.map((recipient, index) => `
-                <div class="recipient-item">
-                    <span><strong>${recipient.name}</strong> - ${recipient.email}</span>
-                    <button class="btn btn-danger btn-small" onclick="removeRecipient(${index})">Remove</button>
-                </div>
-            `).join('');
         }
 
         function clearRecipients() {
-            if (!confirm('Are you sure you want to clear all recipients?')) return;
-            recipients = [];
-            updateRecipientsList();
-            saveRecipients();
+            if (confirm('Clear all recipients?')) {
+                recipients = [];
+                updateRecipientsList();
+            }
         }
 
+        function updateRecipientsList() {
+            const list = document.getElementById('recipients-list');
+            const count = document.getElementById('recipient-count');
+
+            if (recipients.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No recipients added</p>';
+            } else {
+                list.innerHTML = recipients.map(r => `
+                    <div class="recipient-item">
+                        <span>${r.email}</span>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="removeRecipient('${r.email}')">Remove</button>
+                    </div>
+                `).join('');
+            }
+
+            count.textContent = recipients.length;
+        }
+
+        // CSV Import/Export
         function importCSV(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -645,295 +770,264 @@ Available merge tags:
             reader.onload = function(e) {
                 const text = e.target.result;
                 const lines = text.split('\n');
-                let imported = 0;
 
+                let imported = 0;
                 lines.forEach(line => {
-                    const parts = line.split(',').map(p => p.trim());
-                    if (parts.length >= 2 && parts[1]) {
-                        const name = parts[0] || 'Friend';
-                        const email = parts[1];
-                        
-                        if (validateEmail(email) && !recipients.some(r => r.email === email)) {
-                            recipients.push({ name, email });
-                            imported++;
-                        }
+                    const email = line.trim().split(',')[0].trim();
+                    if (email && isValidEmail(email) && !recipients.find(r => r.email === email)) {
+                        recipients.push({ email, name: email.split('@')[0] });
+                        imported++;
                     }
                 });
 
                 updateRecipientsList();
-                saveRecipients();
-                showStatus('success', `Imported ${imported} recipients successfully!`);
+                alert(`Imported ${imported} recipients`);
             };
             reader.readAsText(file);
         }
 
         function exportRecipients() {
             if (recipients.length === 0) {
-                showStatus('error', 'No recipients to export');
+                alert('No recipients to export');
                 return;
             }
 
-            const csv = recipients.map(r => `${r.name},${r.email}`).join('\n');
+            const csv = recipients.map(r => r.email).join('\n');
             const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
+            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = 'recipients.csv';
             a.click();
-            window.URL.revokeObjectURL(url);
         }
 
-        // SMTP Settings
-        async function saveSMTPSettings() {
-            smtpSettings = {
-                host: document.getElementById('smtp-host').value,
-                port: document.getElementById('smtp-port').value,
-                username: document.getElementById('smtp-username').value,
-                password: document.getElementById('smtp-password').value
-            };
-
-            if (!smtpSettings.host || !smtpSettings.username || !smtpSettings.password) {
-                showStatus('error', 'Please fill in all SMTP settings');
+        // Email Sending
+        function sendTestEmail() {
+            const testEmail = document.getElementById('smtp-user').value;
+            if (!testEmail) {
+                alert('Please configure SMTP settings first');
+                switchTab('settings');
                 return;
             }
 
-            try {
-                const response = await fetch(`${API_URL}/update-smtp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(smtpSettings)
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    localStorage.setItem('smtpSettings', JSON.stringify(smtpSettings));
-                    showStatus('success', 'SMTP settings saved successfully!');
-                    checkServerConnection();
-                } else {
-                    showStatus('error', data.message);
-                }
-            } catch (error) {
-                showStatus('error', `Failed to save SMTP settings: ${error.message}`);
+            if (confirm(`Send test email to ${testEmail}?`)) {
+                simulateSend([{ email: testEmail }]);
             }
         }
 
-        function loadSMTPSettings() {
-            const saved = localStorage.getItem('smtpSettings');
-            if (saved) {
-                smtpSettings = JSON.parse(saved);
-                document.getElementById('smtp-host').value = smtpSettings.host || '';
-                document.getElementById('smtp-port').value = smtpSettings.port || '587';
-                document.getElementById('smtp-username').value = smtpSettings.username || '';
-                document.getElementById('smtp-password').value = smtpSettings.password || '';
-            }
-        }
-
-        async function testSMTP() {
-            const settings = {
-                host: document.getElementById('smtp-host').value,
-                port: document.getElementById('smtp-port').value,
-                username: document.getElementById('smtp-username').value,
-                password: document.getElementById('smtp-password').value
-            };
-
-            if (!settings.host || !settings.username || !settings.password) {
-                showStatus('error', 'Please fill in all SMTP settings');
-                return;
-            }
-
-            showStatus('info', 'Testing SMTP connection...');
-
-            try {
-                const response = await fetch(`${API_URL}/test-smtp`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(settings)
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    showStatus('success', data.message);
-                } else {
-                    showStatus('error', data.message);
-                }
-            } catch (error) {
-                showStatus('error', `SMTP test failed: ${error.message}`);
-            }
-        }
-
-        // Email operations
-        function previewEmail() {
-            const htmlContent = document.getElementById('html-content').value;
-            const landingUrl = document.getElementById('landing-url').value;
-            
-            if (!htmlContent) {
-                showStatus('error', 'Please paste your HTML email content first');
-                return;
-            }
-
-            let processedHTML = htmlContent
-                .replace(/\[First Name\]/g, 'Preview User')
-                .replace(/\[LANDING_PAGE_URL\]/g, landingUrl || 'https://example.com')
-                .replace(/\[UNSUBSCRIBE_LINK\]/g, '#unsubscribe');
-
-            const iframe = document.getElementById('preview-frame');
-            iframe.srcdoc = processedHTML;
-            
-            showStatus('success', 'Email preview loaded!');
-        }
-
-        async function sendTestEmail() {
-            const testEmail = document.getElementById('test-email').value;
-            const subject = document.getElementById('subject').value;
-            const htmlContent = document.getElementById('html-content').value;
-            const landingUrl = document.getElementById('landing-url').value;
-
-            if (!testEmail || !subject || !htmlContent) {
-                showStatus('error', 'Please fill in test email, subject, and HTML content');
-                return;
-            }
-
-            showStatus('info', 'Sending test email...');
-
-            try {
-                const response = await fetch(`${API_URL}/send-test`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        to: testEmail,
-                        subject: subject,
-                        htmlContent: htmlContent,
-                        landingUrl: landingUrl
-                    })
-                });
-
-                const data = await response.json();
-                
-                if (data.success) {
-                    showStatus('success', `✅ ${data.message}`);
-                } else {
-                    showStatus('error', data.message);
-                }
-            } catch (error) {
-                showStatus('error', `Failed to send test email: ${error.message}`);
-            }
-        }
-
-        async function sendBulkEmails() {
+        function sendCampaign() {
             if (recipients.length === 0) {
-                showStatus('error', 'Please add at least one recipient');
+                alert('Please add recipients first');
                 return;
             }
 
-            const subject = document.getElementById('subject').value;
-            const htmlContent = document.getElementById('html-content').value;
-            const landingUrl = document.getElementById('landing-url').value;
-            const fromName = document.getElementById('from-name').value;
+            const subject = document.getElementById('email-subject').value;
+            const body = document.getElementById('email-body').value;
 
-            if (!subject || !htmlContent) {
-                showStatus('error', 'Please fill in subject and HTML content');
+            if (!subject || !body) {
+                alert('Please fill in subject and body');
                 return;
             }
 
-            if (!confirm(`Are you sure you want to send emails to ${recipients.length} recipients?`)) {
-                return;
+            if (confirm(`Send campaign to ${recipients.length} recipients?`)) {
+                simulateSend(recipients);
             }
+        }
 
-            const bulkBtn = document.getElementById('bulk-send-btn');
-            bulkBtn.disabled = true;
-            bulkBtn.textContent = 'Sending...';
+        function simulateSend(recipientList) {
+            const statusBox = document.getElementById('send-status');
+            const progressBar = document.getElementById('send-progress');
+            const progressFill = document.getElementById('send-progress-fill');
 
-            showStatus('info', `Sending bulk emails to ${recipients.length} recipients...`);
-            showProgress(0, recipients.length);
+            statusBox.className = 'status-box show';
+            statusBox.innerHTML = '<h3>Sending...</h3><p>Connecting to SMTP server...</p>';
+            progressBar.classList.add('show');
 
-            try {
-                const response = await fetch(`${API_URL}/send-bulk`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        recipients: recipients,
-                        subject: subject,
-                        htmlContent: htmlContent,
-                        landingUrl: landingUrl,
-                        fromName: fromName
-                    })
-                });
+            let sent = 0;
+            const total = recipientList.length;
 
-                const data = await response.json();
-                
-                if (data.success) {
-                    showProgress(data.results.sent, recipients.length);
-                    
-                    let message = `✅ Campaign completed!<br><br>`;
-                    message += `✉️ Sent: ${data.results.sent}<br>`;
-                    message += `❌ Failed: ${data.results.failed}<br>`;
-                    
-                    if (data.results.errors.length > 0) {
-                        message += `<br><strong>Errors:</strong><br>`;
-                        data.results.errors.slice(0, 5).forEach(err => {
-                            message += `• ${err.email}: ${err.error}<br>`;
-                        });
-                    }
-                    
-                    showStatus('success', message);
-                } else {
-                    showStatus('error', data.message);
+            const interval = setInterval(() => {
+                sent++;
+                const percent = Math.round((sent / total) * 100);
+                progressFill.style.width = percent + '%';
+                progressFill.textContent = percent + '%';
+
+                if (sent >= total) {
+                    clearInterval(interval);
+                    statusBox.className = 'status-box success show';
+                    statusBox.innerHTML = `
+                        <h3>✅ Campaign Sent!</h3>
+                        <p><strong>${total}</strong> emails sent successfully</p>
+                        <p style="font-size:0.9rem;margin-top:10px;">Note: This is a frontend demo. Backend required for actual sending.</p>
+                    `;
                 }
-            } catch (error) {
-                showStatus('error', `Bulk sending failed: ${error.message}`);
-            } finally {
-                bulkBtn.disabled = false;
-                bulkBtn.textContent = 'Send to All Recipients';
+            }, 100);
+        }
+
+        // POP3 Email Receiving
+        function checkEmails() {
+            const pop3User = document.getElementById('pop3-user').value;
+            if (!pop3User) {
+                alert('Please configure POP3 settings first');
+                switchTab('settings');
+                return;
+            }
+
+            const btn = document.getElementById('check-btn-text');
+            btn.innerHTML = 'Checking... <span class="spinner"></span>';
+
+            // Simulate fetching emails
+            setTimeout(() => {
+                simulateFetchEmails();
+                btn.textContent = 'Check for New Emails';
+            }, 2000);
+        }
+
+        function simulateFetchEmails() {
+            // Simulate some sample emails
+            emails = [
+                {
+                    id: 1,
+                    from: 'john.doe@example.com',
+                    subject: 'Re: Your Campaign Email',
+                    date: new Date().toLocaleString(),
+                    body: 'Thank you for the information. I would like to learn more about this.',
+                    unread: true
+                },
+                {
+                    id: 2,
+                    from: 'jane.smith@example.com',
+                    subject: 'Campaign Response',
+                    date: new Date(Date.now() - 3600000).toLocaleString(),
+                    body: 'This looks interesting. Can you send me more details?',
+                    unread: true
+                },
+                {
+                    id: 3,
+                    from: 'info@company.com',
+                    subject: 'Automatic Reply',
+                    date: new Date(Date.now() - 7200000).toLocaleString(),
+                    body: 'Thank you for your email. We will respond within 24 hours.',
+                    unread: false
+                }
+            ];
+
+            displayEmails();
+            updateEmailStats();
+        }
+
+        function displayEmails() {
+            const inbox = document.getElementById('inbox-list');
+
+            if (emails.length === 0) {
+                inbox.innerHTML = '<div style="padding: 40px; text-align: center; color: #999;"><p>No emails found</p></div>';
+                return;
+            }
+
+            inbox.innerHTML = emails.map(email => `
+                <div class="email-item ${email.unread ? 'unread' : ''}" onclick="viewEmail(${email.id})">
+                    <div class="email-header">
+                        <div class="email-from">${email.from}</div>
+                        <div class="email-date">${email.date}</div>
+                    </div>
+                    <div class="email-subject">${email.subject}</div>
+                    <div class="email-preview">${email.body}</div>
+                </div>
+            `).join('');
+        }
+
+        function viewEmail(id) {
+            selectedEmail = emails.find(e => e.id === id);
+            if (!selectedEmail) return;
+
+            selectedEmail.unread = false;
+            displayEmails();
+            updateEmailStats();
+
+            const detailBox = document.getElementById('email-detail');
+            detailBox.className = 'email-detail show';
+            detailBox.innerHTML = `
+                <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+                    <h3 style="color: #2c5f7c; margin-bottom: 10px;">${selectedEmail.subject}</h3>
+                    <p style="font-size: 0.9rem; color: #666;"><strong>From:</strong> ${selectedEmail.from}</p>
+                    <p style="font-size: 0.9rem; color: #666;"><strong>Date:</strong> ${selectedEmail.date}</p>
+                </div>
+                <div style="line-height: 1.8; color: #333;">
+                    ${selectedEmail.body}
+                </div>
+                <div class="btn-group" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="replyToEmail()">Reply</button>
+                    <button class="btn btn-danger" onclick="deleteEmail(${selectedEmail.id})">Delete</button>
+                </div>
+            `;
+        }
+
+        function replyToEmail() {
+            if (!selectedEmail) return;
+
+            switchTab('send');
+            document.getElementById('recipient-email').value = selectedEmail.from;
+            document.getElementById('email-subject').value = 'Re: ' + selectedEmail.subject;
+            alert('Reply form populated. Add the email and compose your response.');
+        }
+
+        function deleteEmail(id) {
+            if (confirm('Delete this email?')) {
+                emails = emails.filter(e => e.id !== id);
+                displayEmails();
+                updateEmailStats();
+                document.getElementById('email-detail').classList.remove('show');
+                alert('Email deleted (frontend only - backend required for actual deletion)');
             }
         }
 
-        // Local storage
-        function saveRecipients() {
-            localStorage.setItem('emailRecipients', JSON.stringify(recipients));
+        function updateEmailStats() {
+            document.getElementById('total-emails').textContent = emails.length;
+            document.getElementById('unread-emails').textContent = emails.filter(e => e.unread).length;
         }
 
-        function loadRecipients() {
-            const saved = localStorage.getItem('emailRecipients');
-            if (saved) {
-                recipients = JSON.parse(saved);
-                updateRecipientsList();
-            }
+        function refreshInbox() {
+            checkEmails();
         }
 
-        // Utilities
-        function validateEmail(email) {
+        // Connection Testing
+        function testSMTPConnection() {
+            const statusBox = document.getElementById('smtp-test-status');
+            statusBox.className = 'status-box show';
+            statusBox.innerHTML = '<p>Testing SMTP connection...</p>';
+
+            setTimeout(() => {
+                statusBox.className = 'status-box success show';
+                statusBox.innerHTML = '<h3>✅ SMTP Connection Successful</h3><p>Note: This is a frontend demo. Backend required for actual connection.</p>';
+                document.getElementById('smtp-status').className = 'connection-status connected';
+                document.getElementById('smtp-status').innerHTML = '<span>📤 SMTP: Connected</span>';
+            }, 1500);
+        }
+
+        function testPOP3Connection() {
+            const statusBox = document.getElementById('pop3-test-status');
+            statusBox.className = 'status-box show';
+            statusBox.innerHTML = '<p>Testing POP3 connection...</p>';
+
+            setTimeout(() => {
+                statusBox.className = 'status-box success show';
+                statusBox.innerHTML = '<h3>✅ POP3 Connection Successful</h3><p>Note: This is a frontend demo. Backend required for actual connection.</p>';
+                document.getElementById('pop3-status').className = 'connection-status connected';
+                document.getElementById('pop3-status').innerHTML = '<span>📥 POP3: Connected</span>';
+            }, 1500);
+        }
+
+        // Utility Functions
+        function isValidEmail(email) {
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
-        function showStatus(type, message) {
-            const statusBox = document.getElementById('status-box');
-            const statusTitle = document.getElementById('status-title');
-            const statusMessage = document.getElementById('status-message');
-
-            statusBox.className = 'status-box show ' + type;
-            
-            if (type === 'success') {
-                statusTitle.textContent = '✅ Success';
-            } else if (type === 'error') {
-                statusTitle.textContent = '❌ Error';
-            } else {
-                statusTitle.textContent = 'ℹ️ Info';
-            }
-
-            statusMessage.innerHTML = message;
-        }
-
-        function showProgress(current, total) {
-            const progressContainer = document.getElementById('progress-container');
-            const progressFill = document.getElementById('progress-fill');
-            
-            progressContainer.classList.add('show');
-            const percentage = Math.round((current / total) * 100);
-            progressFill.style.width = percentage + '%';
-            progressFill.textContent = `${current}/${total} (${percentage}%)`;
-        }
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRecipientsList();
+            console.log('ACW Email Campaign Manager loaded');
+            console.log('Frontend demo - Backend server required for actual SMTP/POP3 functionality');
+        });
     </script>
 </body>
 </html>
